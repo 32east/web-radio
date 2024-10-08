@@ -23,6 +23,11 @@ func SendImmediately(w *http.ResponseWriter) {
 
 func Handle() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
 		var header = w.Header()
 		header.Set("Content-Type", "audio/mp3")
 		header.Set("Access-Control-Allow-Origin", "*")
