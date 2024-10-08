@@ -35,7 +35,7 @@ func OnTimerTick() {
 			name = randomFile.Name()
 			fileName = "music/" + name
 
-			if fileName != CurrentMusic.Name {
+			if name != CurrentMusic.Name {
 				break
 			}
 		}
