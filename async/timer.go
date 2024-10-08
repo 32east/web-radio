@@ -83,9 +83,7 @@ func StartTimer() {
 	newTicker := time.NewTicker(time.Millisecond * 300)
 
 	for {
-		select {
-		case <-newTicker.C:
-			OnTimerTick()
-		}
+		<-newTicker.C
+		OnTimerTick()
 	}
 }
