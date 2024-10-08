@@ -67,11 +67,11 @@ func OnTimerTick() {
 		var remapPlusSecond = float64(currentTimePlusSecond) / float64(CurrentMusic.Duration.Milliseconds())
 		var endPosition = int(float64(contentLength) * remapPlusSecond)
 
-		CurrentMusic.LastEndPosition = endPosition
-
 		if endPosition > contentLength {
 			endPosition = contentLength
 		}
+
+		CurrentMusic.LastEndPosition = endPosition
 
 		var startContent = CurrentMusic.Content[startPosition:endPosition]
 
