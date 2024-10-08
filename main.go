@@ -1,35 +1,21 @@
 package main
 
 import (
-	"net/http"
-	"source-query-test/async"
-	"time"
+	"log"
+	"os"
+	"os/signal"
+	"source-query-test/http"
+	"source-query-test/lib"
+	"syscall"
 )
 
 func main() {
-	go async.StartTimer()
+	var chn = make(chan os.Signal)
+	signal.Notify(chn, syscall.SIGINT, syscall.SIGTERM)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		header := w.Header()
-		header.Set("Content-Type", "audio/mp3")
-		header.Set("Access-Control-Allow-Origin", "*")
+	go lib.StartTimer()
+	go http.Handle()
 
-		w.WriteHeader(http.StatusOK)
-
-		async.ResponseWriters[w] = true
-
-		notify := r.Context().Done()
-
-		for {
-			select {
-			case <-notify:
-				delete(async.ResponseWriters, w)
-				return
-			default:
-				time.Sleep(1 * time.Second)
-			}
-		}
-	})
-
-	http.ListenAndServe(":8080", nil)
+	<-chn
+	log.Println("Радио отключено.")
 }

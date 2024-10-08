@@ -1,4 +1,4 @@
-package async
+package lib
 
 import (
 	"github.com/tcolgate/mp3"

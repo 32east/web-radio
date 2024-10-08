@@ -1,4 +1,4 @@
-package async
+package lib
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 var CurrentMusic Music
-var ResponseWriters = make(map[http.ResponseWriter]bool)
+var Writers = make(map[http.ResponseWriter]bool)
 
 func OnTimerTick() {
 	musicIsEnded := time.Now().After(CurrentMusic.StartTime.Add(CurrentMusic.Duration))
@@ -51,7 +51,7 @@ func OnTimerTick() {
 
 		CurrentMusic = Music{fileName, time.Now(), duration, content, []byte{}, 0}
 
-		fmt.Println("Music changed: ", CurrentMusic.Name)
+		fmt.Println("Музыка изменена: ", CurrentMusic.Name)
 	} else { // В данный момент у нас играет какая-то композиция.
 		musicContent := CurrentMusic.Content
 		contentLength := len(musicContent)
@@ -73,7 +73,7 @@ func OnTimerTick() {
 
 		startContent := CurrentMusic.Content[startPosition:endPosition]
 
-		for ResponseWriter := range ResponseWriters {
+		for ResponseWriter := range Writers {
 			ResponseWriter.Write(startContent)
 		}
 	}
