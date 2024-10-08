@@ -18,7 +18,7 @@ func main() {
 
 		async.ResponseWriters[w] = true
 
-		notify := w.(http.CloseNotifier).CloseNotify()
+		notify := r.Context().Done()
 
 		for {
 			select {
@@ -31,7 +31,5 @@ func main() {
 		}
 	})
 
-	server := &http.Server{Addr: ":80"}
-	server.SetKeepAlivesEnabled(false)
-	server.ListenAndServe()
+	http.ListenAndServe(":8080", nil)
 }

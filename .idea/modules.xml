@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/source-query-test.iml" filepath="$PROJECT_DIR$/.idea/source-query-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/web-radio.iml" filepath="$PROJECT_DIR$/.idea/web-radio.iml" />
     </modules>
   </component>
 </project>
