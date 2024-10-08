@@ -6,11 +6,13 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
 var CurrentMusic Music
-var Writers = make(map[http.ResponseWriter]bool)
+var Writers = make(map[*http.ResponseWriter]bool)
+var Mutex = sync.Mutex{}
 
 func OnTimerTick() {
 	musicIsEnded := time.Now().After(CurrentMusic.StartTime.Add(CurrentMusic.Duration))
@@ -52,30 +54,32 @@ func OnTimerTick() {
 		CurrentMusic = Music{fileName, time.Now(), duration, content, []byte{}, 0}
 
 		fmt.Println("Музыка изменена: ", CurrentMusic.Name)
-	} else { // В данный момент у нас играет какая-то композиция.
-		musicContent := CurrentMusic.Content
-		contentLength := len(musicContent)
-		startPosition := CurrentMusic.LastEndPosition
+	} else {
+		var musicContent = CurrentMusic.Content
+		var contentLength = len(musicContent)
+		var startPosition = CurrentMusic.LastEndPosition
 
 		if startPosition >= contentLength {
 			return
 		}
 
-		currentTimePlusSecond := time.Now().Add(time.Millisecond * 1000).Sub(CurrentMusic.StartTime).Milliseconds()
+		var currentTimePlusSecond = time.Now().Sub(CurrentMusic.StartTime).Milliseconds()
 		var remapPlusSecond = float64(currentTimePlusSecond) / float64(CurrentMusic.Duration.Milliseconds())
+		var endPosition = int(float64(contentLength) * remapPlusSecond)
 
-		endPosition := int(float64(contentLength) * remapPlusSecond)
 		CurrentMusic.LastEndPosition = endPosition
 
 		if endPosition > contentLength {
 			endPosition = contentLength
 		}
 
-		startContent := CurrentMusic.Content[startPosition:endPosition]
+		var startContent = CurrentMusic.Content[startPosition:endPosition]
 
+		Mutex.Lock()
 		for ResponseWriter := range Writers {
-			ResponseWriter.Write(startContent)
+			(*ResponseWriter).Write(startContent)
 		}
+		Mutex.Unlock()
 	}
 }
 
