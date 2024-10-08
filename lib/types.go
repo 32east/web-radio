@@ -7,6 +7,11 @@ type Music struct {
 	StartTime       time.Time
 	Duration        time.Duration
 	Content         []byte
-	CurrentContent  []byte
 	LastEndPosition int
+}
+
+type MusicInfo struct {
+	Name     string  `json:"name"`
+	Time     float64 `json:"time"`
+	Duration int64   `json:"duration"`
 }

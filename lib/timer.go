@@ -1,11 +1,12 @@
 package lib
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -15,45 +16,58 @@ var Writers = make(map[*http.ResponseWriter]bool)
 var Mutex = sync.Mutex{}
 
 func OnTimerTick() {
-	musicIsEnded := time.Now().After(CurrentMusic.StartTime.Add(CurrentMusic.Duration))
+	var musicIsEnded = time.Now().After(CurrentMusic.StartTime.Add(CurrentMusic.Duration))
 
 	if CurrentMusic.Name == "" || musicIsEnded {
-		files, err := os.ReadDir("music")
+		var files, err = os.ReadDir("music")
 
 		if err != nil {
 			log.Fatal("Error opening folder: ", err)
 			return
 		}
 
-		filesLength := len(files)
-		fileName := ""
+		var filesLength = len(files)
+		var name = ""
+		var fileName = ""
 
 		for i := 0; i < 5; i++ {
 			randomFile := files[rand.Intn(filesLength)]
-			fileName = "music/" + randomFile.Name()
+			name = randomFile.Name()
+			fileName = "music/" + name
 
 			if fileName != CurrentMusic.Name {
 				break
 			}
 		}
 
-		f, err := os.Open(fileName)
-		defer f.Close()
+		var f, fileErr = os.Open(fileName)
 
-		if err != nil {
-			log.Fatal("Error opening file: ", err)
+		if fileErr != nil {
+			log.Println("Error opening file: ", err)
 			return
 		}
 
-		content, err := GetFileContent(f)
-
-		f, _ = os.Open(fileName)
 		defer f.Close()
+		var content, contentErr = GetFileContent(f)
+
+		if contentErr != nil {
+			log.Println("Error reading file: ", err)
+			return
+		}
+
+		f.Seek(0, 0)
+
 		duration := GetDuration(f)
 
-		CurrentMusic = Music{fileName, time.Now(), duration, content, []byte{}, 0}
+		if duration == 0 {
+			log.Println("Не удалось получись длительность трека: " + name)
+			return
+		}
 
-		fmt.Println("Музыка изменена: ", CurrentMusic.Name)
+		name = strings.TrimSuffix(name, filepath.Ext(name))
+		CurrentMusic = Music{name, time.Now(), duration, content, 0}
+
+		log.Println("Музыка изменена: ", name)
 	} else {
 		var musicContent = CurrentMusic.Content
 		var contentLength = len(musicContent)

@@ -2,7 +2,9 @@ package http
 
 import (
 	"net/http"
+	"source-query-test/http/handlers"
 	"source-query-test/lib"
+	"source-query-test/middleware"
 )
 
 func SendImmediately(w *http.ResponseWriter) {
@@ -37,6 +39,9 @@ func Handle() {
 		delete(lib.Writers, &w)
 		lib.Mutex.Unlock()
 	})
+
+	middleware.API("/api/v1/track-info", handlers.GetTrackInfo)
+	middleware.API("/api/v1/listeners", handlers.GetListeners)
 
 	http.ListenAndServe(":8080", nil)
 }
