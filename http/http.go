@@ -31,13 +31,11 @@ func Handle() {
 		lib.Mutex.Unlock()
 
 		SendImmediately(&w)
+		<-r.Context().Done()
 
-		for {
-			<-r.Context().Done()
-			lib.Mutex.Lock()
-			delete(lib.Writers, &w)
-			lib.Mutex.Unlock()
-		}
+		lib.Mutex.Lock()
+		delete(lib.Writers, &w)
+		lib.Mutex.Unlock()
 	})
 
 	http.ListenAndServe(":8080", nil)
